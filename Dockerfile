@@ -1,14 +1,9 @@
-# Используем официальный образ OpenJDK 11
-FROM openjdk:11
-
-# Устанавливаем рабочую директорию
+FROM maven:3.6.3-jdk-8-slim AS build
 WORKDIR /app
+COPY . .
+RUN mvn clean package
 
-# Копируем исходный код проекта в контейнер
-COPY . /app
-
-# Компилируем проект
-RUN javac Helloworld.java
-
-# Запускаем проект при запуске контейнера
-CMD ["java", "Helloworld"]
+FROM openjdk:8-jre-slim
+WORKDIR /app
+COPY --from=build /app/target/*.jar ./app.jar
+CMD ["java", "-jar", "app.jar"]
